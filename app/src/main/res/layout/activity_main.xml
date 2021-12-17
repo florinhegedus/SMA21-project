@@ -7,6 +7,19 @@
     tools:context=".MainActivity">
 
     <Button
+        android:id="@+id/takePhotoButton"
+        android:layout_width="130dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="40dp"
+        android:text="Take Photo"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline3"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        app:layout_constraintVertical_bias="0.704" />
+
+    <Button
         android:id="@+id/predictButton"
         android:layout_width="130dp"
         android:layout_height="50dp"
@@ -17,7 +30,20 @@
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/guideline3"
         app:layout_constraintTop_toBottomOf="@+id/imageView"
-        app:layout_constraintVertical_bias="0.542" />
+        app:layout_constraintVertical_bias="0.366" />
+
+    <Button
+        android:id="@+id/myXRaysButton"
+        android:layout_width="130dp"
+        android:layout_height="50dp"
+        android:layout_marginEnd="40dp"
+        android:text="XRays"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@+id/guideline3"
+        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        app:layout_constraintVertical_bias="0.704" />
 
     <ImageView
         android:id="@+id/imageView"
@@ -41,7 +67,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView"
-        app:layout_constraintVertical_bias="0.542" />
+        app:layout_constraintVertical_bias="0.366" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline3"
