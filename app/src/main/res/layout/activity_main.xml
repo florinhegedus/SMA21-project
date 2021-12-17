@@ -8,17 +8,19 @@
 
     <Button
         android:id="@+id/predictButton"
-        android:layout_width="150dp"
+        android:layout_width="130dp"
         android:layout_height="50dp"
         android:layout_marginEnd="40dp"
         android:text="predict"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView3"
-        app:layout_constraintVertical_bias="0.54" />
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@+id/guideline3"
+        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        app:layout_constraintVertical_bias="0.542" />
 
     <ImageView
-        android:id="@+id/imageView3"
+        android:id="@+id/imageView"
         android:layout_width="347dp"
         android:layout_height="396dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -30,13 +32,22 @@
 
     <Button
         android:id="@+id/selectButton"
-        android:layout_width="150dp"
+        android:layout_width="130dp"
         android:layout_height="50dp"
         android:layout_marginStart="40dp"
         android:text="select"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline3"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView3"
-        app:layout_constraintVertical_bias="0.54" />
+        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        app:layout_constraintVertical_bias="0.542" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="204dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
