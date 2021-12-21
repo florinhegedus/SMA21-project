@@ -3,6 +3,7 @@ package com.upt.cti.neuralc;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -13,11 +14,17 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.upt.cti.neuralc.services.ImageService;
+
+import java.io.IOException;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final int PICK_IMAGE = 100;
     static final int REQUEST_IMAGE_CAPTURE = 1;
     private ImageView imageView;
+    private Context applicationContext;
+    Bitmap imageBitmap = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
         Button takePhotoButton = (Button) findViewById(R.id.takePhotoButton);
         Button predictButton = (Button) findViewById(R.id.predictButton);
         TextView diagnostic = (TextView) findViewById(R.id.diagnostic);
+        applicationContext = getApplicationContext();
 
         selectButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,8 +58,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v){
                 diagnostic.setVisibility(View.VISIBLE);
+                ImageService.saveToInternalStorage(imageBitmap, applicationContext);
             }
         });
+
     }
 
     private void openGallery() {
@@ -76,12 +86,17 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
+            imageBitmap = (Bitmap) extras.get("data");
             imageView.setImageBitmap(imageBitmap);
         }
         if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
             Uri imageUri = data.getData();
             imageView.setImageURI(imageUri);
+            try {
+                imageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
