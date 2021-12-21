@@ -12,19 +12,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public final class ImageService {
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
 
-    public static String saveToInternalStorage(Bitmap bitmapImage, Context context){
+    public static void saveToInternalStorage(Bitmap bitmapImage, Context context){
         ContextWrapper cw = new ContextWrapper(context);
-        // path to /data/data/yourapp/app_data/imageDir
         File directory = cw.getDir("xrays", Context.MODE_PRIVATE);
-        // Create imageDir
+
         String timestamp = sdf.format(new Date()) + ".jpg";
-        File mypath=new File(directory,timestamp);
+        File mypath = new File(directory,timestamp);
 
         FileOutputStream fos = null;
         try {
@@ -40,22 +40,36 @@ public final class ImageService {
                 e.printStackTrace();
             }
         }
-        return directory.getAbsolutePath();
+
     }
 
-    public Bitmap loadImageFromStorage(String path)
+    public ArrayList<Bitmap> loadImagesFromStorage(File directory)
     {
-        Bitmap b = null;
-        try {
-            File f=new File("/data/data/com.upt.cti.neuralc/app_xrays", "profile.jpg");
-            b = BitmapFactory.decodeStream(new FileInputStream(f));
-        }
-        catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
-        }
+        File[] files = directory.listFiles();
+        ArrayList<Bitmap> bitmapArray = new ArrayList<Bitmap>();
+        for(File f: files){
+            try {
+                bitmapArray.add(BitmapFactory.decodeStream(new FileInputStream(f)));
 
-        return b;
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        return bitmapArray;
 
+    }
+
+    public boolean duplicated(Bitmap bitmap, File directory){
+        File[] files = directory.listFiles();
+        for(File f: files){
+            try {
+                Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
+                if(bitmap.equals(b))
+                    return true;
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
     }
 }
