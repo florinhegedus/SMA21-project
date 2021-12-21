@@ -11,6 +11,7 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,10 +27,13 @@ public class MainActivity extends AppCompatActivity {
         imageView = (ImageView) findViewById(R.id.imageView);
         Button selectButton = (Button) findViewById(R.id.selectButton);
         Button takePhotoButton = (Button) findViewById(R.id.takePhotoButton);
+        Button predictButton = (Button) findViewById(R.id.predictButton);
+        TextView diagnostic = (TextView) findViewById(R.id.diagnostic);
 
         selectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                diagnostic.setVisibility(View.INVISIBLE);
                 openGallery();
             }
         });
@@ -37,14 +41,25 @@ public class MainActivity extends AppCompatActivity {
         takePhotoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                diagnostic.setVisibility(View.INVISIBLE);
                 dispatchTakePictureIntent();
+            }
+        });
+
+        predictButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v){
+                diagnostic.setVisibility(View.VISIBLE);
             }
         });
     }
 
     private void openGallery() {
-        Intent gallery = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-        startActivityForResult(gallery, PICK_IMAGE);
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+
+        Intent chooser = Intent.createChooser(intent, "Choose a Picture");
+        startActivityForResult(chooser, PICK_IMAGE);
     }
 
     private void dispatchTakePictureIntent() {
