@@ -1,4 +1,4 @@
-package com.upt.cti.neuralc;
+package com.upt.cti.neuralc.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -14,7 +14,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.upt.cti.neuralc.R;
 import com.upt.cti.neuralc.services.ImageService;
+import com.upt.cti.neuralc.services.Preprocessing;
 
 import java.io.IOException;
 
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
         Button selectButton = (Button) findViewById(R.id.selectButton);
         Button takePhotoButton = (Button) findViewById(R.id.takePhotoButton);
         Button predictButton = (Button) findViewById(R.id.predictButton);
+        Button xRaysButton = (Button) findViewById(R.id.xRaysButton);
         TextView diagnostic = (TextView) findViewById(R.id.diagnostic);
         applicationContext = getApplicationContext();
 
@@ -59,6 +62,14 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v){
                 diagnostic.setVisibility(View.VISIBLE);
                 ImageService.saveToInternalStorage(imageBitmap, applicationContext);
+            }
+        });
+
+        xRaysButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v){
+                Intent intent = new Intent(MainActivity.this, XRaysActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -87,13 +98,17 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             imageBitmap = (Bitmap) extras.get("data");
+            imageBitmap = Bitmap.createScaledBitmap(imageBitmap, 400, 400, false);
+            imageBitmap = Preprocessing.toGrayscale(imageBitmap);
             imageView.setImageBitmap(imageBitmap);
         }
         if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
             Uri imageUri = data.getData();
-            imageView.setImageURI(imageUri);
             try {
                 imageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                imageBitmap = Bitmap.createScaledBitmap(imageBitmap, 400, 400, false);
+                imageBitmap = Preprocessing.toGrayscale(imageBitmap);
+                imageView.setImageBitmap(imageBitmap);
             } catch (IOException e) {
                 e.printStackTrace();
             }
