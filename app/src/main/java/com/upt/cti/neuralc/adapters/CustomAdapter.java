@@ -41,17 +41,24 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
             correct = itemView.findViewById(R.id.correct);
             incorrect = itemView.findViewById(R.id.incorrect);
 
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d("item", "clicked item");
+                }
+            });
+
             correct.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.d("toast", descriptionText.getText().toString() + " true");
+                    Log.d("button", descriptionText.getText().toString() + " true");
                 }
             });
 
             incorrect.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.d("toast", descriptionText.getText().toString() + " false");
+                    Log.d("button", descriptionText.getText().toString() + " false");
                 }
             });
         }
