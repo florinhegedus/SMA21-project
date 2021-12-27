@@ -12,7 +12,6 @@ import com.upt.cti.neuralc.R;
 import com.upt.cti.neuralc.adapters.CustomAdapter;
 import com.upt.cti.neuralc.services.ImageService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class XRaysActivity extends AppCompatActivity {
@@ -32,7 +31,7 @@ public class XRaysActivity extends AppCompatActivity {
 
         applicationContext = getApplicationContext();
         images = ImageService.loadImagesFromStorage(applicationContext);
-        titles = ImageService.getTitles(applicationContext);
+        titles = ImageService.getDiagnostics(applicationContext);
         descriptions = ImageService.getDescriptions(applicationContext);
 
 

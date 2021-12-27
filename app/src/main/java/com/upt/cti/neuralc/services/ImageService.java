@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,13 +19,16 @@ import java.util.List;
 
 public final class ImageService {
 
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 
-    public static void saveToInternalStorage(Bitmap bitmapImage, Context context){
+    public static void saveToInternalStorage(Bitmap bitmapImage, Context context, double prediction){
         ContextWrapper cw = new ContextWrapper(context);
         File directory = cw.getDir("xrays", Context.MODE_PRIVATE);
 
-        String timestamp = sdf.format(new Date()) + ".jpg";
+        String pred = "4";
+        if(prediction < 0.5)
+            pred = "5";
+        String timestamp = sdf.format(new Date()) + pred + ".jpg";
         File mypath = new File(directory,timestamp);
 
         FileOutputStream fos = null;
@@ -62,7 +66,7 @@ public final class ImageService {
 
     }
 
-    public static List<String> getTitles(Context context) {
+    public static List<String> getDiagnostics(Context context) {
         ContextWrapper cw = new ContextWrapper(context);
         File directory = cw.getDir("xrays", Context.MODE_PRIVATE);
         File[] files = directory.listFiles();
@@ -85,17 +89,12 @@ public final class ImageService {
         return descriptions;
     }
 
-    public boolean duplicated(Bitmap bitmap, File directory){
-        File[] files = directory.listFiles();
-        for(File f: files){
-            try {
-                Bitmap b = BitmapFactory.decodeStream(new FileInputStream(f));
-                if(bitmap.equals(b))
-                    return true;
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
-        return false;
+    public static void renameFile(Context context, String name, int option){
+        ContextWrapper cw = new ContextWrapper(context);
+        File oldFile = new File(cw.getDir("xrays", Context.MODE_PRIVATE), name);
+        String newName = name.substring(0, 14);
+        File newFile = new File(cw.getDir("xrays", Context.MODE_PRIVATE), newName + String.valueOf(option) + ".jpg");
+        oldFile.renameTo(newFile);
+        Log.d("renaming file", oldFile.getName());
     }
 }

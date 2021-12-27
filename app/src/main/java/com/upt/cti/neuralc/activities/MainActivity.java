@@ -60,8 +60,11 @@ public class MainActivity extends AppCompatActivity {
         predictButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v){
-                diagnostic.setVisibility(View.VISIBLE);
-                ImageService.saveToInternalStorage(imageBitmap, applicationContext);
+                if(imageBitmap != null) {
+                    diagnostic.setVisibility(View.VISIBLE);
+                    double prediction = Math.random();
+                    ImageService.saveToInternalStorage(imageBitmap, applicationContext, prediction);
+                }
             }
         });
 

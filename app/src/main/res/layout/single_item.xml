@@ -33,6 +33,14 @@
             android:text="Description"
             android:textSize="16sp" />
 
+        <TextView
+            android:id="@+id/userVerdict"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView"
+            android:textSize="16sp"
+            android:visibility="visible" />
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -44,21 +52,21 @@
                 android:layout_marginBottom="10dp">
 
                 <Button
-                    android:id="@+id/correct"
+                    android:id="@+id/positive"
                     android:layout_width="0dp"
                     android:layout_height="45dp"
                     android:layout_marginRight="5dp"
                     android:layout_weight="1"
-                    android:text="true"
+                    android:text="pos"
                     android:textSize="12sp" />
 
                 <Button
-                    android:id="@+id/incorrect"
+                    android:id="@+id/negative"
                     android:layout_width="0dp"
                     android:layout_height="45dp"
                     android:layout_marginRight="5dp"
                     android:layout_weight="1"
-                    android:text="false"
+                    android:text="neg"
                     android:textSize="12sp" />
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
