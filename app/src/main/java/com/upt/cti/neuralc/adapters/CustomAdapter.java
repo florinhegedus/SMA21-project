@@ -36,7 +36,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         Button positive;
         Button negative;
         String fileName;
-        int verdicts;
+        int verdict;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -102,13 +102,18 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         }
         holder.image.setImageBitmap(bitmaps.get(position));
         holder.fileName = descriptions.get(position);
-        holder.verdicts = Character.getNumericValue(holder.fileName.charAt(14));
-        switch(holder.verdicts){
+        holder.verdict = Character.getNumericValue(holder.fileName.charAt(14));
+        switch(holder.verdict){
             case 0: holder.userVerdict.setText("Your verdict: parodonthosis"); break;
             case 1: holder.userVerdict.setText("Your verdict: healthy"); break;
             case 2: holder.userVerdict.setText("Your verdict: parodonthosis"); break;
             case 3: holder.userVerdict.setText("Your verdict: healthy"); break;
-            default: holder.userVerdict.setText("Your verdict: none");
+            case 4: holder.titleText.setText("NeuralC: parodonthosis");
+                holder.userVerdict.setText("Your verdict: none");
+                break;
+            case 5: holder.titleText.setText("NeuralC: healthy");
+                holder.userVerdict.setText("Your verdict: none");
+                break;
         }
 
 

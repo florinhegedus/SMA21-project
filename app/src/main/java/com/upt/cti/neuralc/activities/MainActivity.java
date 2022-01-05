@@ -18,7 +18,14 @@ import com.upt.cti.neuralc.R;
 import com.upt.cti.neuralc.services.ImageService;
 import com.upt.cti.neuralc.services.Preprocessing;
 
+import org.pytorch.LiteModuleLoader;
+import org.pytorch.Module;
+
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,11 +34,17 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imageView;
     private Context applicationContext;
     Bitmap imageBitmap = null;
+    Module module = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        try {
+            module = LiteModuleLoader.load(assetFilePath(this, "paronet_optimied.ptl"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         imageView = (ImageView) findViewById(R.id.imageView);
         Button selectButton = (Button) findViewById(R.id.selectButton);
@@ -63,7 +76,13 @@ public class MainActivity extends AppCompatActivity {
                 if(imageBitmap != null) {
                     diagnostic.setVisibility(View.VISIBLE);
                     double prediction = Math.random();
-                    ImageService.saveToInternalStorage(imageBitmap, applicationContext, prediction);
+                    if(prediction < 0.5) {
+                        diagnostic.setText("Result: healthy (" + String.valueOf(prediction).substring(0, 4) + ")");
+                        ImageService.saveToInternalStorage(imageBitmap, applicationContext, 5);
+                    } else {
+                        diagnostic.setText("Result: parodonthosis (" + String.valueOf(prediction).substring(0, 4) + ")");
+                        ImageService.saveToInternalStorage(imageBitmap, applicationContext, 4);
+                    }
                 }
             }
         });
@@ -102,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
             Bundle extras = data.getExtras();
             imageBitmap = (Bitmap) extras.get("data");
             imageBitmap = Bitmap.createScaledBitmap(imageBitmap, 400, 400, false);
-            imageBitmap = Preprocessing.toGrayscale(imageBitmap);
+            //imageBitmap = Preprocessing.toGrayscale(imageBitmap);
             imageView.setImageBitmap(imageBitmap);
         }
         if (requestCode == PICK_IMAGE && resultCode == RESULT_OK) {
@@ -110,11 +129,30 @@ public class MainActivity extends AppCompatActivity {
             try {
                 imageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
                 imageBitmap = Bitmap.createScaledBitmap(imageBitmap, 400, 400, false);
-                imageBitmap = Preprocessing.toGrayscale(imageBitmap);
+                //imageBitmap = Preprocessing.toGrayscale(imageBitmap);
                 imageView.setImageBitmap(imageBitmap);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public static String assetFilePath(Context context, String assetName) throws IOException {
+        File file = new File(context.getFilesDir(), assetName);
+        if (file.exists() && file.length() > 0) {
+            return file.getAbsolutePath();
+        }
+
+        try (InputStream is = context.getAssets().open(assetName)) {
+            try (OutputStream os = new FileOutputStream(file)) {
+                byte[] buffer = new byte[4 * 1024];
+                int read;
+                while ((read = is.read(buffer)) != -1) {
+                    os.write(buffer, 0, read);
+                }
+                os.flush();
+            }
+            return file.getAbsolutePath();
         }
     }
 

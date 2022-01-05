@@ -21,14 +21,11 @@ public final class ImageService {
 
     private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 
-    public static void saveToInternalStorage(Bitmap bitmapImage, Context context, double prediction){
+    public static void saveToInternalStorage(Bitmap bitmapImage, Context context, int prediction){
         ContextWrapper cw = new ContextWrapper(context);
         File directory = cw.getDir("xrays", Context.MODE_PRIVATE);
 
-        String pred = "4";
-        if(prediction < 0.5)
-            pred = "5";
-        String timestamp = sdf.format(new Date()) + pred + ".jpg";
+        String timestamp = sdf.format(new Date()) + String.valueOf(prediction) + ".jpg";
         File mypath = new File(directory,timestamp);
 
         FileOutputStream fos = null;
