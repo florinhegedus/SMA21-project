@@ -9,23 +9,30 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.upt.cti.neuralc.R;
 import com.upt.cti.neuralc.services.ImageService;
 import com.upt.cti.neuralc.services.Preprocessing;
 
+import org.pytorch.IValue;
 import org.pytorch.LiteModuleLoader;
+import org.pytorch.MemoryFormat;
 import org.pytorch.Module;
+import org.pytorch.Tensor;
+import org.pytorch.torchvision.TensorImageUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         try {
-            module = LiteModuleLoader.load(assetFilePath(this, "paronet_optimied.ptl"));
+            module = LiteModuleLoader.load(assetFilePath(getApplicationContext(), "paronet_mobile.ptl"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -75,12 +82,12 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v){
                 if(imageBitmap != null) {
                     diagnostic.setVisibility(View.VISIBLE);
-                    double prediction = Math.random();
+                    int prediction = predict(imageBitmap);
                     if(prediction < 0.5) {
-                        diagnostic.setText("Result: healthy (" + String.valueOf(prediction).substring(0, 4) + ")");
+                        diagnostic.setText("Result: healthy");
                         ImageService.saveToInternalStorage(imageBitmap, applicationContext, 5);
                     } else {
-                        diagnostic.setText("Result: parodonthosis (" + String.valueOf(prediction).substring(0, 4) + ")");
+                        diagnostic.setText("Result: parodonthosis");
                         ImageService.saveToInternalStorage(imageBitmap, applicationContext, 4);
                     }
                 }
@@ -154,6 +161,18 @@ public class MainActivity extends AppCompatActivity {
             }
             return file.getAbsolutePath();
         }
+    }
+
+    public int predict(Bitmap bitmap){
+        final Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(bitmap, TensorImageUtils.TORCHVISION_NORM_MEAN_RGB, TensorImageUtils.TORCHVISION_NORM_STD_RGB, MemoryFormat.CHANNELS_LAST);
+        final Tensor outputTensor = module.forward(IValue.from(inputTensor)).toTensor();
+        float threshold = 0.493f;
+        final float[] scores = outputTensor.getDataAsFloatArray();
+        Log.d("Scores", Arrays.toString(scores));
+        if(scores[0] < threshold)
+            return 0;
+        else
+            return 1;
     }
 
 
