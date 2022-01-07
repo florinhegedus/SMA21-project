@@ -1,10 +1,15 @@
 package com.upt.cti.neuralc.activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -43,6 +48,9 @@ public class MainActivity extends AppCompatActivity {
     Bitmap imageBitmap = null;
     Module module = null;
 
+    private static final int CAMERA_PERMISSION_CODE = 100;
+    private static final int STORAGE_PERMISSION_CODE = 101;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,7 +73,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 diagnostic.setVisibility(View.INVISIBLE);
-                openGallery();
+                if(checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_PERMISSION_CODE)) {
+                    openGallery();
+                }
             }
         });
 
@@ -73,7 +83,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 diagnostic.setVisibility(View.INVISIBLE);
-                dispatchTakePictureIntent();
+                if(checkPermission(Manifest.permission.CAMERA, CAMERA_PERMISSION_CODE)) {
+                    dispatchTakePictureIntent();
+                }
             }
         });
 
@@ -118,6 +130,41 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         } catch (ActivityNotFoundException e) {
             // display error state to the user
+        }
+    }
+
+    public boolean checkPermission(String permission, int requestCode)
+    {
+        // Checking if permission is not granted
+        if (ContextCompat.checkSelfPermission(MainActivity.this, permission) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[] { permission }, requestCode);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == CAMERA_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(MainActivity.this, "Camera Permission Granted", Toast.LENGTH_SHORT).show();
+                dispatchTakePictureIntent();
+            }
+            else {
+                Toast.makeText(MainActivity.this, "Camera Permission Denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+        else if (requestCode == STORAGE_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(MainActivity.this, "Storage Permission Granted", Toast.LENGTH_SHORT).show();
+                openGallery();
+            }
+            else {
+                Toast.makeText(MainActivity.this, "Storage Permission Denied", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -166,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
     public int predict(Bitmap bitmap){
         final Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(bitmap, TensorImageUtils.TORCHVISION_NORM_MEAN_RGB, TensorImageUtils.TORCHVISION_NORM_STD_RGB, MemoryFormat.CHANNELS_LAST);
         final Tensor outputTensor = module.forward(IValue.from(inputTensor)).toTensor();
-        float threshold = 0.493f;
+        float threshold = 0.510f;
         final float[] scores = outputTensor.getDataAsFloatArray();
         Log.d("Scores", Arrays.toString(scores));
         if(scores[0] < threshold)
