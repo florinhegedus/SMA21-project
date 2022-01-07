@@ -21,9 +21,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.upt.cti.neuralc.R;
 import com.upt.cti.neuralc.services.ImageService;
-import com.upt.cti.neuralc.services.Preprocessing;
 
 import org.pytorch.IValue;
 import org.pytorch.LiteModuleLoader;
@@ -39,6 +40,18 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 
+import android.os.Bundle;
+import androidx.appcompat.app.AppCompatActivity;
+import android.util.Log;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+
+
 public class MainActivity extends AppCompatActivity {
 
     private static final int PICK_IMAGE = 100;
@@ -50,6 +63,9 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int CAMERA_PERMISSION_CODE = 100;
     private static final int STORAGE_PERMISSION_CODE = 101;
+
+    FirebaseDatabase database = FirebaseDatabase.getInstance("https://neuralc-e1f6d-default-rtdb.europe-west1.firebasedatabase.app/");
+    DatabaseReference myRef = database.getReference("NeuralC");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
