@@ -4,7 +4,16 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -54,7 +63,7 @@ public final class ImageService {
         for(File f: files){
             try {
                 bitmapArray.add(BitmapFactory.decodeStream(new FileInputStream(f)));
-
+                uploadImage(f);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
@@ -93,5 +102,46 @@ public final class ImageService {
         File newFile = new File(cw.getDir("xrays", Context.MODE_PRIVATE), newName + String.valueOf(option) + ".jpg");
         oldFile.renameTo(newFile);
         Log.d("renaming file", oldFile.getName());
+    }
+
+    public static void uploadImage(File to_upload){
+        FirebaseStorage storage;
+        StorageReference storageReference;
+        storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
+        Uri file = Uri.fromFile(to_upload);
+
+        String name = file.getLastPathSegment();
+        Log.d("Uploading to cloud: ", name);
+        int diagnostic = Character.getNumericValue(name.charAt(14));
+        switch(diagnostic) {
+            case 0: //user" parodonthosis"
+                break;
+            case 1: //healthy
+                break;
+            case 2: //user: parodonthosis
+                break;
+            case 3: //user: healthy
+                break;
+            case 4: //NeuralC: parodonthosis, user: None
+                break;
+            case 5: //NeuralC: healthy, user: None
+                break;
+        }
+        name = name.substring(0,14) + ".jpg";
+        StorageReference riversRef = storageReference.child("images/"+name);
+        UploadTask uploadTask = riversRef.putFile(file);
+
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+            }
+        });
     }
 }
