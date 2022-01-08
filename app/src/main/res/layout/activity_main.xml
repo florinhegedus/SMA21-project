@@ -10,11 +10,11 @@
         android:id="@+id/imageView"
         android:layout_width="350dp"
         android:layout_height="350dp"
-        android:layout_marginTop="84dp"
+        android:layout_marginTop="80dp"
         android:maxWidth="350dp"
         android:maxHeight="350dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.491"
+        app:layout_constraintHorizontal_bias="0.459"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:srcCompat="@tools:sample/avatars" />
