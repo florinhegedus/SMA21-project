@@ -23,6 +23,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -59,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int CAMERA_PERMISSION_CODE = 3;
     private static final int STORAGE_PERMISSION_CODE = 4;
 
+    FirebaseAuth mAuth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,8 +78,10 @@ public class MainActivity extends AppCompatActivity {
         Button takePhotoButton = (Button) findViewById(R.id.takePhotoButton);
         Button predictButton = (Button) findViewById(R.id.predictButton);
         Button xRaysButton = (Button) findViewById(R.id.xRaysButton);
+        Button logOutButton = (Button) findViewById(R.id.logOutButton);
         TextView diagnostic = (TextView) findViewById(R.id.diagnostic);
         applicationContext = getApplicationContext();
+        mAuth = FirebaseAuth.getInstance();
 
         selectButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,6 +128,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        logOutButton.setOnClickListener(view ->{
+            mAuth.signOut();
+            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+        });
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null){
+            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+        }
     }
 
     private void openGallery() {

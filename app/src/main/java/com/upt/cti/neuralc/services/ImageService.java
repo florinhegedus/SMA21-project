@@ -11,6 +11,8 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -111,32 +113,36 @@ public final class ImageService {
         storageReference = storage.getReference();
         Uri file = Uri.fromFile(to_upload);
 
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = mAuth.getCurrentUser();
+        String userName = user.getEmail();
+
         String name = file.getLastPathSegment();
         Log.d("Uploading to cloud: ", name);
         int diagnostic = Character.getNumericValue(name.charAt(14));
         String path = "not_classified/";
         switch(diagnostic) {
             case 0: //user" parodonthosis"
-                path = "parodonthosis/";
+                path = "parodonthosis";
                 break;
             case 1: //healthy
-                path = "healthy/";
+                path = "healthy";
                 break;
             case 2: //user: parodonthosis
-                path = "parodonthosis/";
+                path = "parodonthosis";
                 break;
             case 3: //user: healthy
-                path = "healthy/";
+                path = "healthy";
                 break;
             case 4: //NeuralC: parodonthosis, user: None
-                path = "not_classified/";
+                path = "not_classified";
                 break;
             case 5: //NeuralC: healthy, user: None
-                path = "not_classified/";
+                path = "not_classified";
                 break;
         }
         name = name.substring(0,14) + ".jpg";
-        StorageReference riversRef = storageReference.child(path+name);
+        StorageReference riversRef = storageReference.child(userName+ "/" + path + "/" + name);
         UploadTask uploadTask = riversRef.putFile(file);
 
         uploadTask.addOnFailureListener(new OnFailureListener() {
