@@ -1,10 +1,15 @@
 package com.upt.cti.neuralc.activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,6 +21,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.upt.cti.neuralc.R;
 import com.upt.cti.neuralc.services.ImageService;
 import com.upt.cti.neuralc.services.Preprocessing;
@@ -27,6 +41,7 @@ import org.pytorch.Module;
 import org.pytorch.Tensor;
 import org.pytorch.torchvision.TensorImageUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,12 +51,17 @@ import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int PICK_IMAGE = 100;
-    static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final int PICK_IMAGE = 1;
+    static final int REQUEST_IMAGE_CAPTURE = 2;
     private ImageView imageView;
     private Context applicationContext;
     Bitmap imageBitmap = null;
     Module module = null;
+
+    private static final int CAMERA_PERMISSION_CODE = 3;
+    private static final int STORAGE_PERMISSION_CODE = 4;
+
+    FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,14 +78,18 @@ public class MainActivity extends AppCompatActivity {
         Button takePhotoButton = (Button) findViewById(R.id.takePhotoButton);
         Button predictButton = (Button) findViewById(R.id.predictButton);
         Button xRaysButton = (Button) findViewById(R.id.xRaysButton);
+        Button logOutButton = (Button) findViewById(R.id.logOutButton);
         TextView diagnostic = (TextView) findViewById(R.id.diagnostic);
         applicationContext = getApplicationContext();
+        mAuth = FirebaseAuth.getInstance();
 
         selectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 diagnostic.setVisibility(View.INVISIBLE);
-                openGallery();
+                if(checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_PERMISSION_CODE)) {
+                    openGallery();
+                }
             }
         });
 
@@ -73,7 +97,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 diagnostic.setVisibility(View.INVISIBLE);
-                dispatchTakePictureIntent();
+                if(checkPermission(Manifest.permission.CAMERA, CAMERA_PERMISSION_CODE)) {
+                    dispatchTakePictureIntent();
+                }
             }
         });
 
@@ -102,6 +128,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        logOutButton.setOnClickListener(view ->{
+            mAuth.signOut();
+            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+        });
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null){
+            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+        }
     }
 
     private void openGallery() {
@@ -166,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
     public int predict(Bitmap bitmap){
         final Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(bitmap, TensorImageUtils.TORCHVISION_NORM_MEAN_RGB, TensorImageUtils.TORCHVISION_NORM_STD_RGB, MemoryFormat.CHANNELS_LAST);
         final Tensor outputTensor = module.forward(IValue.from(inputTensor)).toTensor();
-        float threshold = 0.493f;
+        float threshold = 0.510f;
         final float[] scores = outputTensor.getDataAsFloatArray();
         Log.d("Scores", Arrays.toString(scores));
         if(scores[0] < threshold)
@@ -175,5 +215,38 @@ public class MainActivity extends AppCompatActivity {
             return 1;
     }
 
+    public boolean checkPermission(String permission, int requestCode)
+    {
+        // Checking if permission is not granted
+        if (ContextCompat.checkSelfPermission(MainActivity.this, permission) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[] { permission }, requestCode);
+            return false;
+        }
+        return true;
+    }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == CAMERA_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(MainActivity.this, "Camera Permission Granted", Toast.LENGTH_SHORT).show();
+                dispatchTakePictureIntent();
+            }
+            else {
+                Toast.makeText(MainActivity.this, "Camera Permission Denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+        else if (requestCode == STORAGE_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(MainActivity.this, "Storage Permission Granted", Toast.LENGTH_SHORT).show();
+                openGallery();
+            }
+            else {
+                Toast.makeText(MainActivity.this, "Storage Permission Denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 }

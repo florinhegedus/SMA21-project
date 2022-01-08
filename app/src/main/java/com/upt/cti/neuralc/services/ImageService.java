@@ -4,7 +4,18 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -54,7 +65,7 @@ public final class ImageService {
         for(File f: files){
             try {
                 bitmapArray.add(BitmapFactory.decodeStream(new FileInputStream(f)));
-
+                uploadImage(f);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
@@ -93,5 +104,71 @@ public final class ImageService {
         File newFile = new File(cw.getDir("xrays", Context.MODE_PRIVATE), newName + String.valueOf(option) + ".jpg");
         oldFile.renameTo(newFile);
         Log.d("renaming file", oldFile.getName());
+    }
+
+    public static void uploadImage(File to_upload){
+        FirebaseStorage storage;
+        StorageReference storageReference;
+        storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
+        Uri file = Uri.fromFile(to_upload);
+
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = mAuth.getCurrentUser();
+        String userName = user.getEmail();
+
+        String name = file.getLastPathSegment();
+        Log.d("Uploading to cloud: ", name);
+        int diagnostic = Character.getNumericValue(name.charAt(14));
+        String path = "not_classified/";
+        switch(diagnostic) {
+            case 0: path = "parodonthosis"; break;
+            case 1: path = "healthy"; break;
+            case 2: path = "parodonthosis"; break;
+            case 3: path = "healthy"; break;
+            case 4: path = "not_classified"; break;
+            case 5: path = "not_classified"; break;
+        }
+        name = name.substring(0,14) + ".jpg";
+        StorageReference riversRef = storageReference.child(userName+ "/" + path + "/" + name);
+        deleteImage(userName, path, name);
+        UploadTask uploadTask = riversRef.putFile(file);
+
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+            }
+        });
+    }
+
+    public static void deleteImage(String userName, String path, String name){
+        String[] paths = {"healthy", "parodonthosis", "not_classified"};
+        FirebaseStorage storage;
+        StorageReference storageReference;
+        storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
+
+        for(String p: paths){
+            if(p != path){
+                StorageReference toDelete = storageReference.child(userName + "/" + p + "/" + name);
+                toDelete.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d("Image deleted", userName + "/" + p + "/" + name);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Uh-oh, an error occurred!
+                    }
+                });
+            }
+        }
     }
 }
