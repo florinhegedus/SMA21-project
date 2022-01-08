@@ -122,27 +122,16 @@ public final class ImageService {
         int diagnostic = Character.getNumericValue(name.charAt(14));
         String path = "not_classified/";
         switch(diagnostic) {
-            case 0: //user" parodonthosis"
-                path = "parodonthosis";
-                break;
-            case 1: //healthy
-                path = "healthy";
-                break;
-            case 2: //user: parodonthosis
-                path = "parodonthosis";
-                break;
-            case 3: //user: healthy
-                path = "healthy";
-                break;
-            case 4: //NeuralC: parodonthosis, user: None
-                path = "not_classified";
-                break;
-            case 5: //NeuralC: healthy, user: None
-                path = "not_classified";
-                break;
+            case 0: path = "parodonthosis"; break;
+            case 1: path = "healthy"; break;
+            case 2: path = "parodonthosis"; break;
+            case 3: path = "healthy"; break;
+            case 4: path = "not_classified"; break;
+            case 5: path = "not_classified"; break;
         }
         name = name.substring(0,14) + ".jpg";
         StorageReference riversRef = storageReference.child(userName+ "/" + path + "/" + name);
+        deleteImage(userName, path, name);
         UploadTask uploadTask = riversRef.putFile(file);
 
         uploadTask.addOnFailureListener(new OnFailureListener() {
@@ -156,5 +145,30 @@ public final class ImageService {
 
             }
         });
+    }
+
+    public static void deleteImage(String userName, String path, String name){
+        String[] paths = {"healthy", "parodonthosis", "not_classified"};
+        FirebaseStorage storage;
+        StorageReference storageReference;
+        storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
+
+        for(String p: paths){
+            if(p != path){
+                StorageReference toDelete = storageReference.child(userName + "/" + p + "/" + name);
+                toDelete.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d("Image deleted", userName + "/" + p + "/" + name);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Uh-oh, an error occurred!
+                    }
+                });
+            }
+        }
     }
 }
