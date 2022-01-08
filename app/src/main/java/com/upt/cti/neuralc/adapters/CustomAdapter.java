@@ -104,16 +104,12 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         holder.fileName = descriptions.get(position);
         holder.verdict = Character.getNumericValue(holder.fileName.charAt(14));
         switch(holder.verdict){
-            case 0: holder.userVerdict.setText("Your verdict: parodonthosis"); break;
-            case 1: holder.userVerdict.setText("Your verdict: healthy"); break;
-            case 2: holder.userVerdict.setText("Your verdict: parodonthosis"); break;
-            case 3: holder.userVerdict.setText("Your verdict: healthy"); break;
-            case 4: holder.titleText.setText("NeuralC: parodonthosis");
-                holder.userVerdict.setText("Your verdict: none");
-                break;
-            case 5: holder.titleText.setText("NeuralC: healthy");
-                holder.userVerdict.setText("Your verdict: none");
-                break;
+            case 0: holder.userVerdict.setText("Your verdict: parodonthosis"); holder.titleText.setText("NeuralC: parodonthosis"); break;
+            case 1: holder.userVerdict.setText("Your verdict: healthy"); holder.titleText.setText("NeuralC: parodonthosis");break;
+            case 2: holder.userVerdict.setText("Your verdict: parodonthosis"); holder.titleText.setText("NeuralC: healthy");break;
+            case 3: holder.userVerdict.setText("Your verdict: healthy"); holder.titleText.setText("NeuralC: healthy");break;
+            case 4: holder.titleText.setText("NeuralC: parodonthosis");holder.userVerdict.setText("Your verdict: none");break;
+            case 5: holder.titleText.setText("NeuralC: healthy");holder.userVerdict.setText("Your verdict: none");break;
         }
 
 
