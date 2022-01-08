@@ -59,9 +59,6 @@ public class MainActivity extends AppCompatActivity {
     private static final int CAMERA_PERMISSION_CODE = 3;
     private static final int STORAGE_PERMISSION_CODE = 4;
 
-    FirebaseStorage storage;
-    StorageReference storageReference;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,17 +68,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        FirebaseDatabase database = FirebaseDatabase.getInstance("https://neuralc-e1f6d-default-rtdb.europe-west1.firebasedatabase.app/");
-        DatabaseReference myRef = database.getReference("NeuralC");
-
-        storage = FirebaseStorage.getInstance();
-        storageReference = storage.getReference();
-
-        myRef.setValue("Hello, World!");
-        myRef.child("Io").setValue("OAAANANANANA");
-        myRef.child("as").setValue("aaxax");
-        myRef.child("123").setValue("wwwwww");
 
         imageView = (ImageView) findViewById(R.id.imageView);
         Button selectButton = (Button) findViewById(R.id.selectButton);
@@ -115,7 +101,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v){
                 if(imageBitmap != null) {
-                    uploadImageToCloud(imageBitmap);
                     diagnostic.setVisibility(View.VISIBLE);
                     int prediction = predict(imageBitmap);
                     if(prediction < 0.5) {
@@ -244,34 +229,4 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-    public void uploadImageToCloud(Bitmap bitmap){
-
-        StorageReference storageRef = storage.getReference();
-
-// Create a reference to "mountains.jpg"
-        StorageReference mountainsRef = storageRef.child("mountains.jpg");
-
-// Create a reference to 'images/mountains.jpg'
-        StorageReference mountainImagesRef = storageRef.child("images/mountains.jpg");
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[] data = baos.toByteArray();
-
-        UploadTask uploadTask = mountainsRef.putBytes(data);
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle unsuccessful uploads
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                // ...
-            }
-        });
-    }
-
-
 }

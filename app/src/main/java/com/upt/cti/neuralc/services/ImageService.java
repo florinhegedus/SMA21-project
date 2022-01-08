@@ -114,22 +114,29 @@ public final class ImageService {
         String name = file.getLastPathSegment();
         Log.d("Uploading to cloud: ", name);
         int diagnostic = Character.getNumericValue(name.charAt(14));
+        String path = "not_classified/";
         switch(diagnostic) {
             case 0: //user" parodonthosis"
+                path = "parodonthosis/";
                 break;
             case 1: //healthy
+                path = "healthy/";
                 break;
             case 2: //user: parodonthosis
+                path = "parodonthosis/";
                 break;
             case 3: //user: healthy
+                path = "healthy/";
                 break;
             case 4: //NeuralC: parodonthosis, user: None
+                path = "not_classified/";
                 break;
             case 5: //NeuralC: healthy, user: None
+                path = "not_classified/";
                 break;
         }
         name = name.substring(0,14) + ".jpg";
-        StorageReference riversRef = storageReference.child("images/"+name);
+        StorageReference riversRef = storageReference.child(path+name);
         UploadTask uploadTask = riversRef.putFile(file);
 
         uploadTask.addOnFailureListener(new OnFailureListener() {
